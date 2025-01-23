@@ -1,4 +1,5 @@
 import 'package:expense_tracker/components/expense_card.dart';
+import 'package:expense_tracker/components/expense_form.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:expense_tracker/models/expense_model.dart';
@@ -8,7 +9,7 @@ class ExpensesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Expense> sampleExpenses = [
+    List<Expense> expenses = [
       Expense(
         title: 'Broadband Payment',
         amount: 15.00,
@@ -70,7 +71,7 @@ class ExpensesScreen extends StatelessWidget {
                 const Gap(30),
 
                 // expense cards
-                ...sampleExpenses.map((expense) => ExpenseCard(expense)),
+                ...expenses.map((expense) => ExpenseCard(expense)),
               ],
             ),
           ),
@@ -86,7 +87,7 @@ class ExpensesScreen extends StatelessWidget {
         return Container(
           padding: EdgeInsets.all(16),
           width: double.infinity,
-          child: Text('data'),
+          child: const ExpenseForm(),
         );
       },
     );
