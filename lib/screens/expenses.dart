@@ -4,32 +4,37 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:expense_tracker/models/expense_model.dart';
 
-class ExpensesScreen extends StatelessWidget {
+class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    List<Expense> expenses = [
-      Expense(
-        title: 'Broadband Payment',
-        amount: 15.00,
-        date: DateTime.now(),
-        category: Category.bills,
-      ),
-      Expense(
-        title: 'Bus Fare',
-        amount: 5.00,
-        date: DateTime.now(),
-        category: Category.transportation,
-      ),
-      Expense(
-        title: 'Weekend Meeting',
-        amount: 30.00,
-        date: DateTime.now(),
-        category: Category.food,
-      ),
-    ];
+  State<ExpensesScreen> createState() => _ExpensesScreenState();
+}
 
+class _ExpensesScreenState extends State<ExpensesScreen> {
+  List<Expense> expenses = [
+    Expense(
+      title: 'Broadband Payment',
+      amount: 15.00,
+      date: DateTime.now(),
+      category: Category.bills,
+    ),
+    Expense(
+      title: 'Bus Fare',
+      amount: 5.00,
+      date: DateTime.now(),
+      category: Category.transportation,
+    ),
+    Expense(
+      title: 'Weekend Meeting',
+      amount: 30.00,
+      date: DateTime.now(),
+      category: Category.food,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -80,14 +85,24 @@ class ExpensesScreen extends StatelessWidget {
     );
   }
 
+  void addExpense(Expense newExpense) {
+    setState(() {
+      expenses.add(newExpense);
+    });
+  }
+
+  //  void addExpense(Expense newExpense) {
   void _showAddExpenseModalBottomSheet(BuildContext context) {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return Container(
           padding: EdgeInsets.all(16),
           width: double.infinity,
-          child: const ExpenseForm(),
+          child: ExpenseForm(
+            onAddExpense: addExpense,
+          ),
         );
       },
     );
