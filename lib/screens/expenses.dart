@@ -67,7 +67,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        _showAddExpenseModalBottomSheet(context);
+                        _showExpenseModalBottomSheet(context);
                       },
                       icon: const Icon(Icons.add),
                     ),
@@ -75,8 +75,49 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 ),
                 const Gap(30),
 
+                if (expenses.isEmpty) ...[
+                  Gap(MediaQuery.of(context).size.height * 0.3),
+                  const Center(
+                    child: Text('Nothing to show!'),
+                  ),
+                ],
+
                 // expense cards
-                ...expenses.map((expense) => ExpenseCard(expense)),
+                ...expenses.map(
+                  (expense) => Dismissible(
+                    onDismissed: (dismissDirection) {
+                      final expenseObj = expense;
+                      final expeseIndex = expenses.indexOf(expense);
+
+                      setState(() {
+                        expenses.remove(expense);
+                      });
+
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Expense removed!'),
+                          action: SnackBarAction(
+                            label: 'Undo',
+                            onPressed: () {
+                              setState(() {
+                                // expenses.add(expenseObj);
+                                expenses.insert(expeseIndex, expenseObj);
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    key: ValueKey(expense.id),
+                    child: InkWell(
+                      onTap: () {
+                        _showExpenseModalBottomSheet(context, expense: expense);
+                      },
+                      child: ExpenseCard(expense),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -91,8 +132,17 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     });
   }
 
+  void editExpense(Expense editedExpense) {
+    final expenseIndex =
+        expenses.indexWhere((expense) => expense.id == editedExpense.id);
+
+    setState(() {
+      expenses[expenseIndex] = editedExpense;
+    });
+  }
+
   //  void addExpense(Expense newExpense) {
-  void _showAddExpenseModalBottomSheet(BuildContext context) {
+  void _showExpenseModalBottomSheet(BuildContext context, {Expense? expense}) {
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -102,6 +152,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           width: double.infinity,
           child: ExpenseForm(
             onAddExpense: addExpense,
+            onEditExpense: editExpense,
+            expense: expense,
           ),
         );
       },

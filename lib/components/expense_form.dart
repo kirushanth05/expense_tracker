@@ -4,9 +4,16 @@ import 'package:intl/intl.dart';
 import 'package:expense_tracker/models/expense_model.dart';
 
 class ExpenseForm extends StatefulWidget {
-  const ExpenseForm({super.key, required this.onAddExpense});
+  const ExpenseForm({
+    super.key,
+    required this.onAddExpense,
+    this.expense,
+    this.onEditExpense,
+  });
 
   final void Function(Expense expense) onAddExpense;
+  final void Function(Expense expense)? onEditExpense;
+  final Expense? expense;
 
   @override
   State<ExpenseForm> createState() => _ExpenseFormState();
@@ -27,6 +34,20 @@ class _ExpenseFormState extends State<ExpenseForm> {
         ),
       )
       .toList();
+
+  @override
+  void initState() {
+    if (widget.expense != null) {
+      final receivedExpense = widget.expense!;
+
+      chosenDate = receivedExpense.date;
+      _expenseTitleController.text = receivedExpense.title;
+      _amountController.text = receivedExpense.amount.toString();
+      expenseCategory = receivedExpense.category;
+      categoryName = receivedExpense.category.name;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +125,6 @@ class _ExpenseFormState extends State<ExpenseForm> {
                         category.name.toLowerCase() ==
                         value.toString().toLowerCase());
 
-                print('selected category : $selectedCategory');
-
                 setState(() {
                   expenseCategory = selectedCategory;
                   categoryName = selectedCategory.name;
@@ -118,12 +137,25 @@ class _ExpenseFormState extends State<ExpenseForm> {
         const Gap(32),
 
         TextButton(
-          onPressed: createExpense,
-          child: const Row(
+          onPressed: widget.expense != null
+              ? () {
+                  if (!isValidInput()) return;
+                  widget.expense!.title = _expenseTitleController.text.trim();
+                  widget.expense!.amount =
+                      double.parse(_amountController.text.trim());
+                  widget.expense!.date = chosenDate!;
+                  widget.expense!.category = expenseCategory;
+
+                  widget.onEditExpense!(widget.expense!);
+                  Navigator.pop(context);
+                }
+              : createExpense,
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add),
-              Text('Add expense'),
+              Icon(widget.expense != null ? Icons.edit : Icons.add),
+              const Gap(8),
+              Text('${widget.expense != null ? 'Edit' : 'Add'} Expense'),
             ],
           ),
         ),
@@ -146,11 +178,13 @@ class _ExpenseFormState extends State<ExpenseForm> {
     // validate user input
     if (!isValidInput()) return;
 
-    widget.onAddExpense(Expense(
+    final expenseObj = Expense(
         title: _expenseTitleController.text.trim(),
         amount: double.parse(_amountController.text.trim()),
         date: chosenDate!,
-        category: expenseCategory));
+        category: expenseCategory);
+
+    widget.onAddExpense(expenseObj);
 
     Navigator.pop(context);
   }
